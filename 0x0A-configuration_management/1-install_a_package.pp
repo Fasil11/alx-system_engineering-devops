@@ -1,6 +1,5 @@
-#Using Puppet, install flask from pip
+# install puppet-lint -v 2.5.0
 
- exec { 'install-puppet-lint':
- command => '/usr/bin/apt-get -y install puppet-lint',
- require => [Package['puppet-lint'], Exec['apt-update']],
- }
+exec { 'puppet-lint':
+  command => '/usr/bin/apt-get -y install puppet-lint -v 2.5.0',
+}
