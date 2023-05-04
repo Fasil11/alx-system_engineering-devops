@@ -8,4 +8,4 @@ sudo echo  'ENABLED=1' >> sudo etc/default/haproxy
 # Edit configuration for servers
 sudo sed -i "$ a\ \nfrontend load_balancer\n\tbind *:80\n\tdefault_backend myservers\n\nbackend myservers\n\tbalance roundrobin\n\tserver 165847-web-01 52.3.247.204 check port 80\n\tserver 165847-web-02 54.242.111.30 check port 80" /etc/haproxy/haproxy.cfg
 # Restart HAproxy
-sudo service haproxy restarti
+sudo service haproxy restart
