@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
-# This script is displaying "Holberton School" 10 times
-i=10
-while [ "$i" -gt 0 ]
+# This script is displaying "Best School" 10 times
+
+count=0
+while [ $count -lt 10 ]
 do
-    echo "Holberton School"
-    if [ "$i" -eq 2 ]
+    if [ $count -eq 8 ]
     then
+        echo "Best School"
         echo "Hi"
+    else
+        echo "Best School"
     fi
-    i=$((i - 1))
+    count=$((count+1))
 done
-i=$i
