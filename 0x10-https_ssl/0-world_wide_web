@@ -1,30 +1,32 @@
-#   domain_information "$1" "web-01"
-#   domain_information "$1" "web-02"
-# elif [ "$#" == 2 ]
-# then
-#   domain_information "$1" "$2"
-# fi
-#-- To be evaluated --
+#!/usr/bin/env bash
+# Uses dig and awk to obtain specific subdomains and ip from a website
+# shellcheck disable=SC2086
 
-subdomains_all=( "www" "lb-01" "web-01" "web-02" )
+# Uses args to obtain the specific domain and ip requested
+get_specific_subdomain () {
 
-runDig () {
-    subdomain=$1
-    domain=$2
+	dig $2.$1 | awk 'c&&!--c;/;; ANSWER SECTION:/{c=1}' | awk -v subdom=$2 '{ print "The subdomain " subdom " is a " $4 " record and points to " $5}'
 
-    dig "$subdomain.$domain" | grep -A1 'ANSWER SECTION:' | tail -1 | awk -v
-s="$subdomain" 'BEGIN { FS = " " } ; { print "The subdomain " s " is a " $4 "
-record and points to " $5 }'
+	return 0
 }
 
-if [ $# -eq 1 ]; then
-    domain="$1"
-    for i in "${subdomains_all[@]}"
-    do
-        runDig "$i" "$domain"
-    done
-elif [ $# -eq 2 ]; then
-    domain="$1"
-    subdomain="$2"
-    runDig "$subdomain" "$domain"
+# Gets all the subdomains from requested website
+get_all_subdomain () {
+
+	subdomains=("www" "lb-01" "web-01" "web-02")
+		
+	for subdomain in "${subdomains[@]}"
+	do
+		dig $subdomain.$1 | awk 'c&&!--c;/;; ANSWER SECTION:/{c=1}' | awk -v subdom="$subdomain" '{ print "The subdomain " subdom " is a " $4 " record and points to " $5}'
+	done
+
+	return 0
+}
+
+# Determines which function by number of args passed
+if [ -z $2 ]
+then
+	get_all_subdomain "$1"
+else
+	get_specific_subdomain "$1" "$2"
 fi
