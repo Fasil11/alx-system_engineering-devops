@@ -1,32 +1,23 @@
-#!/usr/bin/env bash
-# Uses dig and awk to obtain specific subdomains and ip from a website
-# shellcheck disable=SC2086
+#!/bin/bash
 
-# Uses args to obtain the specific domain and ip requested
-get_specific_subdomain () {
+get_record_info() {
+    local domain="$1"
+    local subdomain="$2"
 
-	dig $2.$1 | awk 'c&&!--c;/;; ANSWER SECTION:/{c=1}' | awk -v subdom=$2 '{ print "The subdomain " subdom " is a " $4 " record and points to " $5}'
+    local record_type=$(nslookup -type=ANY "$subdomain.$domain" | awk '/^'$subdomain'\./{print $4}')
+    local destination=$(nslookup -type=A "$subdomain.$domain" | awk '/^Address:/{print $2}')
 
-	return 0
+    echo "The subdomain $subdomain is a $record_type record and points to $destination"
 }
 
-# Gets all the subdomains from requested website
-get_all_subdomain () {
+domain="$1"
+subdomain="$2"
 
-	subdomains=("www" "lb-01" "web-01" "web-02")
-		
-	for subdomain in "${subdomains[@]}"
-	do
-		dig $subdomain.$1 | awk 'c&&!--c;/;; ANSWER SECTION:/{c=1}' | awk -v subdom="$subdomain" '{ print "The subdomain " subdom " is a " $4 " record and points to " $5}'
-	done
-
-	return 0
-}
-
-# Determines which function by number of args passed
-if [ -z $2 ]
-then
-	get_all_subdomain "$1"
+if [ -z "$subdomain" ]; then
+    get_record_info "$domain" "www"
+    get_record_info "$domain" "lb-01"
+    get_record_info "$domain" "web-01"
+    get_record_info "$domain" "web-02"
 else
-	get_specific_subdomain "$1" "$2"
+    get_record_info "$domain" "$subdomain"
 fi
