@@ -1,14 +1,33 @@
 #!/usr/bin/env bash
+
 # Redirects page to Google and adds custom error and header
-sudo apt-get -y update
+sudo apt-get update
 sudo apt-get install -y nginx
-sudo bash -c "echo 'Hello World!'> /var/www/html/index.nginx-debian.html"
-REDIRECT="\\\tlocation \/redirect_me{\n\t\treturn 301 http:\/\/www.google.com;}"
+
+sudo bash -c "echo 'Hello World!' > /var/www/html/index.nginx-debian.html"
+
+REDIRECT="\
+    location /redirect_me {\n\
+        return 301 http://www.google.com;\n\
+    }"
+
 sudo sed -i "47i $REDIRECT" /etc/nginx/sites-available/default
+
 sudo touch /usr/share/nginx/html/404.html
-sudo bash -c "echo Ceci n\'est pas une page > /usr/share/nginx/html/404.html"
-ERROR="\\\terror_page 404 /404.html;\n\tlocation = /404.html {\n\t\troot /usr/share/nginx/html;\n\t\tinternal        ;\n\t}"
+sudo bash -c "echo 'Ceci n\'est pas une page' > /usr/share/nginx/html/404.html"
+
+ERROR="\
+    error_page 404 /404.html;\n\
+    location = /404.html {\n\
+        root /usr/share/nginx/html;\n\
+        internal;\n\
+    }"
+
 sudo sed -i "49i $ERROR" /etc/nginx/sites-available/default
-str="\\\t\tadd_header X-Served-By $HOSTNAME;"
-sudo sed -i "58i $str" /etc/nginx/sites-available/default
+
+HEADER="\
+    add_header X-Served-By \$HOSTNAME;"
+
+sudo sed -i "58i $HEADER" /etc/nginx/sites-available/default
+
 sudo service nginx restart
