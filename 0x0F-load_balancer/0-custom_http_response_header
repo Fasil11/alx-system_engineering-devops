@@ -1,38 +1,11 @@
 #!/usr/bin/env bash
-
-# Update package repositories
-sudo apt-get update
-
-# Install Nginx
-sudo apt-get install -y nginx
-
-# Create index page
-sudo bash -c "echo 'Hello World!' > /var/www/html/index.nginx-debian.html"
-
-# Add redirect location to Nginx configuration
-REDIRECT="location /redirect_me {
-    return 301 http://www.google.com;
-}"
-sudo sed -i '/# pass the PHP scripts to FastCGI server/,+5d' /etc/nginx/sites-available/default
-sudo sed -i '/location \/ {/a \\t'"$REDIRECT" /etc/nginx/sites-available/default
-
-# Create custom 404 page
-sudo bash -c "echo 'Ceci n\'est pas une page' > /usr/share/nginx/html/404.html"
-
-# Add error page configuration to Nginx
-ERROR="error_page 404 /404.html;
-location = /404.html {
-    root /usr/share/nginx/html;
-    internal;
-}"
-sudo sed -i '/# pass the PHP scripts to FastCGI server/,+5d' /etc/nginx/sites-available/default
-sudo sed -i '/location \/ {/a \\t'"$ERROR" /etc/nginx/sites-available/default
-
-# Add custom header
-HOSTNAME=$(hostname)
-HEADER="add_header X-Served-By $HOSTNAME;"
-sudo sed -i '/# pass the PHP scripts to FastCGI server/,+5d' /etc/nginx/sites-available/default
-sudo sed -i '/location \/ {/a \\t'"$HEADER" /etc/nginx/sites-available/default
-
-# Restart Nginx service
-sudo service nginx restart
+# Install nginx and add a custom header
+apt-get update
+apt-get -y install nginx
+ufw allow 'Nginx HTTP'
+echo "Hello World" > /var/www/html/index.nginx-debian.html
+echo "Ceci n'est pas une page" > /usr/share/nginx/html/custom_404.html
+sed -i "/listen 80 default_server/a \\\trewrite ^/redirect_me https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;" /etc/nginx/sites-available/default
+sed -i "/listen 80 default_server/a \\\terror_page 404 /custom_404.html; location = /custom_404.html {root /usr/share/nginx/html;\n\tinternal;}" /etc/nginx/sites-available/default
+sed -i "/listen 80 default_server/a \\\tadd_header X-Served-By $(hostname);" /etc/nginx/sites-available/default
+service nginx restart
