@@ -1,5 +1,5 @@
-# Change nginx file limit
-exec { 'Change nginx limit':
-  command  => 'sudo sed -i "s/15/4096/g" /etc/default/nginx; sudo service nginx restart',
+# Edit typo in settings file
+exec { 'Edit filename':
+  command  => 'sudo sed -i "s/.phpp/.php/" /var/www/html/wp-settings.php',
   provider => shell,
 }
